@@ -1,0 +1,10 @@
+httpx[socks]
+beautifulsoup4
+lxml
+phonenumbers
+camoufox
+stem
+aioipapi
+babel
+tqdm
+ 
