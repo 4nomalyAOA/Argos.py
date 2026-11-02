@@ -1,13 +1,13 @@
 # Argos: Asynchronous Web Data Extraction & OSINT Tool
 
-Argos is an asynchronous web data extraction tool designed for optimized OSINT research and cybersecurity auditing[cite: 7].
+Argos is an asynchronous web data extraction tool designed for optimized OSINT research and cybersecurity auditing.
 
 ### Key Features:
-* **Evasion and anonymity:** Features the integration of hardened browser technologies using Camoufox[cite: 6], Tor circuit rotation (with the option to use a custom proxy configuration)[cite: 6, 7], and automated CAPTCHA detection/handling[cite: 6].
+* **Evasion and anonymity:** Features the integration of hardened browser technologies using Camoufox, Tor circuit rotation (with the option to use a custom proxy configuration), and automated CAPTCHA detection/handling.
   
-* **In-depth intelligence gathering:** Extracts metadata, HTTP security headers, visible and hidden links with recursive scraping capabilities[cite: 7, 8], contact details including international phone number geolocation and carrier lookup[cite: 7], and form inputs[cite: 7].
+* **In-depth intelligence gathering:** Extracts metadata, HTTP security headers, visible and hidden links with recursive scraping capabilities, contact details including international phone number geolocation and carrier lookup, and form inputs.
   
-* **AI-powered reporting:** Seamlessly integrates generated JSON data structures with multiple LLM APIs (OpenAI, Claude, Gemini, DeepSeek, Ollama, etc.) for automated analysis and security report generation[cite: 5, 7].
+* **AI-powered reporting:** Seamlessly integrates generated JSON data structures with multiple LLM APIs (OpenAI, Claude, Gemini, DeepSeek, Ollama, etc.) for automated analysis and security report generation.
 
 ### Note:
 This project is currently in beta. 
