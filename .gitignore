@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Specific files of Argos.py
+session.json
+*.json
+!example_config.json
