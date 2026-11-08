@@ -224,3 +224,4 @@ session.json
 *.json
 !example_config.json
 FETCH_HEAD
+.DS_Store
