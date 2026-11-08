@@ -143,6 +143,7 @@ def extract_contacts(text):
 
     phones_result = phones if phones else "None"
     tqdm.write(f"\n[+] Phone numbers found: {phones_result}")
+    
     contacts['emails'] = list(set(emails)) #putting all the emails and phonenumbers in this dictionairy
     contacts['phones_infos'] = phones
     
@@ -235,20 +236,23 @@ async def process_sitemaps(scraper_tools, sitemap_url):
             print("\n[-] No URLs found on this page")
             return []
     
-def ask_url_limit():
+def ask_url_limit(args):
     """Ask the limit of urls found to process"""
-    limit = input("\n[?] What's the number max of URL(s) from the sitemap that I can scrap ? (default:10):")
-    limit = int(limit) if limit.strip().isdigit() else 10 #check if it's really a number and transform the input into a number
-    return limit
+    if not args.depth:
+        limit = input("\n[?] What's the number max of URL(s) from the sitemap that I can scrap ? (default:10):")
+        limit = int(limit) if limit.strip().isdigit() else 10 #check if it's really a number and transform the input into a number
+    else:
+        limit = args.depth
+        return limit
    
-async def orchestrator(scraper_tools, sitemap_url, robots_url, visited_pages, queue):
+async def orchestrator(scraper_tools, sitemap_url, robots_url, visited_pages, queue, args):
     """Orchestrates all the others fonctions working with Robots.txt and sitemap.xml"""
     if robots_url:
         await process_robots(robots_url, scraper_tools)
     if sitemap_url:
         urls = await process_sitemaps(scraper_tools, sitemap_url)
         if urls:
-            limit = ask_url_limit() #defines a limit so you don't scrap thousands of urls
+            limit = ask_url_limit(args) #defines a limit so you don't scrap thousands of urls
             await test_url(scraper_tools, urls, robots_url, limit,  visited_pages, queue)
 
 async def test_url(scraper_tools, urls, robots_url, limit, visited_pages, queue):
@@ -361,7 +365,7 @@ def use_proxy(dicti):
         proxy_url = f"{protocol}://{address}:{port}"
         return proxy_url
 
-async def process_url(url, scraper_tools, proxy_url, tor_process, visited_pages, queue):
+async def process_url(url, scraper_tools, proxy_url, tor_process, visited_pages, queue, args):
     """Orchestrates the scraping pipeline for one URL ◊"""
     print(f"\n==================== ANALYZING ◊: {url} ====================")
     
@@ -409,18 +413,24 @@ async def process_url(url, scraper_tools, proxy_url, tor_process, visited_pages,
     
     #--Asking for the downloading choice--
     if images:
-        while download_choice.lower() != 'y' and download_choice.lower() != 'n':
-            download_choice = input("\n[?] Do you want to download the images from this page? [y/N]: ")
+        if not args.images:
+            while download_choice.lower() != 'y' and download_choice.lower() != 'n':
+                download_choice = input("\n[?] Do you want to download the images from this page? [y/N]: ")
             
-            if download_choice.lower() == 'y':
-                folder_name = input("\n[?] Enter directory name to save images: ")
-                await scraper_tools.download_images(folder_name, images, url)
+                if download_choice.lower() == 'y':
+                    folder_name = input("\n[?] Enter directory name to save images: ")
+                    await scraper_tools.download_images(folder_name, images, url)
                 
-            elif download_choice.lower() == 'n':
-                data['Images'] = tools.display_images_src(images)
+                elif download_choice.lower() == 'n':
+                    data['Images'] = tools.display_images_src(images)
                 
-            else:
-                print("\n[-] No valid input entered")
+                else:
+                    print("\n[-] No valid input entered")
+                    
+        else:
+            folder_name = args.images
+            await scraper_tools.download_images(folder_name, images, url)
+            
 
     data["Forms"] = extract_forms(soup)
     data["Contacts"] = extract_contacts(text_content)
@@ -437,9 +447,12 @@ async def process_url(url, scraper_tools, proxy_url, tor_process, visited_pages,
     if sitemap_url:
         data["Sitemap.xml link"] = sitemap_url
 
-    await orchestrator(scraper_tools, sitemap_url, robots_url, visited_pages, queue)
-
-    await test2_url(scraper_tools, robots_url, find_URL(soup), ask_url_limit(), url, visited_pages, queue)
+    await orchestrator(scraper_tools, sitemap_url, robots_url, visited_pages, queue, args)
+    
+    if not args.depth:
+        await test2_url(scraper_tools, robots_url, find_URL(soup), ask_url_limit(), url, visited_pages, queue)
+    else:
+        await test2_url(scraper_tools, robots_url, find_URL(soup), args.depth, url, visited_pages, queue)
 
     data["Comments"] = comments(soup)
 
@@ -450,7 +463,11 @@ async def process_url(url, scraper_tools, proxy_url, tor_process, visited_pages,
     if response_h1:
         data["Server infos"] = tools.analyze_server_info(response_h1)
         data["Security headers"] = tools.analyze_security_headers(response_h1)
-    name = input("\n[?] What name do you want to give the JSON file?")
+    
+    if not args.json:
+        name = input("\n[?] What name do you want to give the JSON file?")
+    else:
+        name = args.json
     
     #--Exporting the data--
 
@@ -458,53 +475,70 @@ async def process_url(url, scraper_tools, proxy_url, tor_process, visited_pages,
     
     #--Asking if the user want to export the data to an AI--
     ai = ""
-    while ai.lower() != 'n' and ai.lower() != 'y':
-        ai = input("\n[?] Do you want to export the data to an AI using your API ? [y/N]")
+    if not args.ai_model:
+        while ai.lower() != 'n' and ai.lower() != 'y':
+            ai = input("\n[?] Do you want to export the data to an AI using your API ? [y/N]")
     
-        if ai.lower() == 'y':
-            provider = AI_analyzer.ask_ai_choice()
+            if ai.lower() == 'y':
+                provider = AI_analyzer.ask_ai_choice()
         
-            if provider:
-                content = await AI_analyzer.send_ai(data, provider)
-                AI_analyzer.content_saver(content)
+                if provider:
+                    content = await AI_analyzer.send_ai(data, provider)
+                    AI_analyzer.content_saver(content)
 
-        elif ai.lower() == 'n':
-            continue
+            elif ai.lower() == 'n':
+                continue
         
-        else:
-            print("\n[-] No valid input entered")
+            else:
+                print("\n[-] No valid input entered")
+    
+    else:
+        provider = args.ai_model
+        content = await AI_analyzer.send_ai(data, provider)
+        AI_analyzer.content_saver(content)
             
     visited_pages.add(url)
             
 
-async def main():
+async def main(args):
     """The main thing, making everything work"""
     show_banner()
     tor_process = None
+    
     try:
         queue = asyncio.Queue()
         visited_pages = set()
-    
-        raw_urls = input("\n[?] Enter one or multiple URLs separated by commas: ")
-        urls = set([u.strip() for u in raw_urls.split(',') if u.strip()]) #The list of urls
-        for url in tqdm(urls, desc="Adding the Url(s) to the queue..."):
-            queue.put_nowait(url)
-    
+        
+        if not args.url:
+            raw_urls = input("\n[?] Enter one or multiple URLs separated by commas: ")
+            urls = set([u.strip() for u in raw_urls.split(',') if u.strip()]) #The list of urls
+            
+            for url in tqdm(urls, desc="Adding the Url(s) to the queue..."):
+                queue.put_nowait(url)
+        else:
+            urls = set([u.strip() for u in args.url.split(',') if u.strip()])
+            for url in tqdm(urls, desc="Adding the Url(s) to the queue..."):
+                queue.put_nowait(url)
+                    
         tor_process = None
         proxy_url = "socks5h://127.0.0.1:9050" #The default value of the proxy 
     
-        tor_bool = input("\n[?] Do you want to use your own proxy or the tor proxy ? [Y/Tor]")
-        if tor_bool.lower() == 'y':
-            proxy_url = orchestrator_2()
-        elif tor_bool.lower() == 'tor':
-            tor_process = antiBotBypassing.tor_proxy() #Initiating the proxy
-        else:
-            print("\n[-] Error, no valid option entered, Tor is going to be used...")
-            tor_process = antiBotBypassing.tor_proxy()
+        if not args.tor or not args.proxy:
+            tor_bool = input("\n[?] Do you want to use your own proxy or the tor proxy ? [Y/Tor]")
+            
+            if tor_bool.lower() == 'y':
+                proxy_url = orchestrator_2()
+                
+            elif tor_bool.lower() == 'tor':
+                tor_process = antiBotBypassing.tor_proxy() #Initiating the proxy
+                
+            else:
+                print("\n[-] Error, no valid option entered, Tor is going to be used...")
+                tor_process = antiBotBypassing.tor_proxy()
     
-        if proxy_url is None:
-            tor_process = antiBotBypassing.tor_proxy()
-            proxy_url = "socks5h://127.0.0.1:9050"
+            if proxy_url is None:
+                tor_process = antiBotBypassing.tor_proxy()
+                proxy_url = "socks5h://127.0.0.1:9050"
         
         try: 
             scraper_tools = tools.ScrapingTools(proxy_port="9050")
