@@ -22,7 +22,7 @@ or easier:
 Launch a basic script with claude analyzing:
  python argos.py --url https://example.com --tor --ai_model claude
 
-More specified analyze
+More specified analyze:
  python argos.py --url https://example.com --depth 5 --json test.json --images images
  
 ---
