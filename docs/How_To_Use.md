@@ -17,7 +17,12 @@ pip install -r requirements.txt
 
 By default, Argos leverages a proxy to ensure anonymity and IP rotation. Ensure your local Tor or proxy service is running, then launch the main script:
 python src/scraper.py
+or easier:
+# Launch a basic script with claude analyzing
+python argos.py --url https://example.com --tor --ai_model claude
 
+# More specified analyze
+python argos.py --url https://example.com --depth 5 --json test.json --images images
 ---
 
 ## 3. Configuration 
