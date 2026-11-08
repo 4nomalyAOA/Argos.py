@@ -11,3 +11,5 @@ Argos is structured into four modular asynchronous components:
 - **Tools (`src/tools.py`):** Contains utility functions, HTTP header parsing logic, and helper features (such as downloading tools).
   
 - **AI Analyzer (`src/AI_analyzer.py`):** Structures extracted raw data into standardized JSON formats and interfaces with LLM APIs for automated intelligence analysis.
+
+- **Argos.py:** Script to lauch the script with options on a single line: python3 argos.py --url <URL> [OPTIONS]
