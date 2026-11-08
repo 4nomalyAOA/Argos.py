@@ -23,6 +23,7 @@ python argos.py --url https://example.com --tor --ai_model claude
 
 # More specified analyze
 python argos.py --url https://example.com --depth 5 --json test.json --images images
+ 
 ---
 
 ## 3. Configuration 
