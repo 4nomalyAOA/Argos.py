@@ -1,6 +1,7 @@
--u, --url : Target URL to scrape (required).   -d, --depth : Maximum number of other URLs found on the page or the sitemap to scrape (default: 10).   
---ai_model : LLM model to export and analyze the JSON file (choices: chatgpt, claude, gemini, mistral, deepseek, grok, qwen, ollama; default: claude). 
---tor : Enable Tor circuit rotation and Tor proxy.   
---proxy : Use your own custom proxy configuration for anonymity.   
--j, --json : Filename to save the output JSON report (default: argos_report.json).   
--i, --images : Directory name to save the images found on the page
+- **`-u, --url`**: URL to scrape (required).
+- **`-d, --depth`**: Maximum number of other URLs found on the page or the sitemap to scrape (default: 10).
+- **`--ai_model`**: LLM model that'll analyze the JSON file (choices: `chatgpt`, `claude`, `gemini`, `mistral`, `deepseek`, `grok`, `qwen`, `ollama`; default: `claude`).
+- **`--tor`**: Enable tor proxy and tor circuit rotation.
+- **`--proxy`**: Use your own custom proxy configuration for anonymity and a stealthier fingerprint.
+- **`-j, --json`**: Filename to save the JSON output (default: `argos_report.json`).
+- **`-i, --images`**: Directory name to save the images found on the page.
