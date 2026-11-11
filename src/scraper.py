@@ -414,6 +414,7 @@ async def process_url(url, scraper_tools, proxy_url, tor_process, visited_pages,
     #--Asking for the downloading choice--
     if images:
         if not args.images:
+            
             while download_choice.lower() != 'y' and download_choice.lower() != 'n':
                 download_choice = input("\n[?] Do you want to download the images from this page? [y/N]: ")
             
@@ -477,6 +478,7 @@ async def process_url(url, scraper_tools, proxy_url, tor_process, visited_pages,
     ai = ""
     if not args.ai_model:
         while ai.lower() != 'n' and ai.lower() != 'y':
+            
             ai = input("\n[?] Do you want to export the data to an AI using your API ? [y/N]")
     
             if ai.lower() == 'y':
@@ -523,20 +525,20 @@ async def main(args):
         tor_process = None
         proxy_url = "socks5h://127.0.0.1:9050" #The default value of the proxy 
     
-        if not args.tor or not args.proxy:
+        if args.tor:
+            tor_process = antiBotBypassing.tor_proxy()
+            proxy_url = "socks5h://127.0.0.1:9050"
+        
+        elif args.proxy:
+            proxy_url = orchestrator_2()
+        
+        else:
+            #Interactive mode if no args
             tor_bool = input("\n[?] Do you want to use your own proxy or the tor proxy ? [Y/Tor]")
-            
             if tor_bool.lower() == 'y':
                 proxy_url = orchestrator_2()
                 
-            elif tor_bool.lower() == 'tor':
-                tor_process = antiBotBypassing.tor_proxy() #Initiating the proxy
-                
             else:
-                print("\n[-] Error, no valid option entered, Tor is going to be used...")
-                tor_process = antiBotBypassing.tor_proxy()
-    
-            if proxy_url is None:
                 tor_process = antiBotBypassing.tor_proxy()
                 proxy_url = "socks5h://127.0.0.1:9050"
         
@@ -547,7 +549,7 @@ async def main(args):
 
             while not queue.empty():
                 url = await queue.get()
-                await process_url(url, scraper_tools, proxy_url, tor_process, visited_pages, queue)
+                await process_url(url, scraper_tools, proxy_url, tor_process, visited_pages, queue, args)
                 tqdm.write("\n[+] Waiting some seconds before next URL")
                 
                 queue.task_done() #remove the task
